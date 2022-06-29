@@ -55,10 +55,13 @@ static void free_handle(struct scap_engine_handle engine)
 	free(engine.m_handle);
 }
 
-static uint32_t get_max_consumers()
+static uint32_t get_max_consumers(const char *probe_name)
 {
 	uint32_t max;
-	FILE *pfile = fopen("/sys/module/" SCAP_KERNEL_MODULE_NAME "/parameters/max_consumers", "r");
+	char filename[SCAP_MAX_PATH_SIZE];
+	snprintf(filename, sizeof(filename), "/sys/module/%s/parameters/max_consumers", probe_name != NULL ? probe_name : SCAP_KERNEL_MODULE_NAME);
+	FILE *pfile = fopen(filename, "r");
+
 	if(pfile != NULL)
 	{
 		int w = fscanf(pfile, "%"PRIu32, &max);
@@ -123,7 +126,9 @@ int32_t scap_kmod_init(scap_t *handle, scap_open_args *oargs)
 		//
 		// Open the device
 		//
-		snprintf(filename, sizeof(filename), "%s/dev/" DRIVER_DEVICE_NAME "%d", scap_get_host_root(), all_scanned_devs);
+        const char *probe_name = (oargs->fname ==  NULL ? DRIVER_DEVICE_NAME : oargs->fname);
+		snprintf(filename, sizeof(filename), "%s/dev/%s%d", scap_get_host_root(), probe_name, all_scanned_devs);
+
 
 		if((dev->m_fd = open(filename, O_RDWR | O_SYNC)) < 0)
 		{
@@ -136,12 +141,13 @@ int32_t scap_kmod_init(scap_t *handle, scap_open_args *oargs)
 			}
 			else if(errno == EBUSY)
 			{
-				uint32_t curr_max_consumers = get_max_consumers();
-				snprintf(handle->m_lasterr, SCAP_LASTERR_SIZE, "Too many consumers attached to device %s. Current value for /sys/module/" SCAP_KERNEL_MODULE_NAME "/parameters/max_consumers is '%"PRIu32"'.", filename, curr_max_consumers);
+				uint32_t curr_max_consumers = get_max_consumers(probe_name);
+				const char *module_name = (oargs->fname ==  NULL ? SCAP_KERNEL_MODULE_NAME : oargs->fname);
+				snprintf(handle->m_lasterr, SCAP_LASTERR_SIZE, "Too many consumers attached to device %s. Current value for /sys/module/%s/parameters/max_consumers is '%"PRIu32"'.", filename, module_name, curr_max_consumers);
 			}
 			else
 			{
-				snprintf(handle->m_lasterr, SCAP_LASTERR_SIZE, "error opening device %s. Make sure you have root credentials and that the " DRIVER_NAME " module is loaded.", filename);
+				snprintf(handle->m_lasterr, SCAP_LASTERR_SIZE, "error opening device %s. Make sure you have root credentials and that the %s module is loaded.", filename, probe_name);
 			}
 
 			return SCAP_FAILURE;

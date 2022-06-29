@@ -504,7 +504,7 @@ void sinsp::fill_syscalls_of_interest(scap_open_args *oargs)
 	}
 }
 
-void sinsp::open_live_common(uint32_t timeout_ms, scap_mode_t mode)
+void sinsp::open_live_common(uint32_t timeout_ms, scap_mode_t mode, const std::string& probe_name)
 {
 	char error[SCAP_LASTERR_SIZE];
 
@@ -522,7 +522,7 @@ void sinsp::open_live_common(uint32_t timeout_ms, scap_mode_t mode)
 	scap_open_args oargs;
 
 	oargs.mode = mode;
-	oargs.fname = NULL;
+	oargs.fname = !probe_name.empty() ? probe_name.c_str() : NULL;
 	oargs.proc_callback = NULL;
 	oargs.proc_callback_context = NULL;
 	oargs.udig = m_udig;
@@ -583,15 +583,15 @@ void sinsp::open_live_common(uint32_t timeout_ms, scap_mode_t mode)
 	init();
 }
 
-void sinsp::open(uint32_t timeout_ms)
+void sinsp::open(uint32_t timeout_ms, const std::string& probe_name)
 {
-	open_live_common(timeout_ms, SCAP_MODE_LIVE);
+	open_live_common(timeout_ms, SCAP_MODE_LIVE, probe_name);
 }
 
 void sinsp::open_udig(uint32_t timeout_ms)
 {
 	m_udig = true;
-	open_live_common(timeout_ms, SCAP_MODE_LIVE);
+	open_live_common(timeout_ms, SCAP_MODE_LIVE, "");
 }
 
 void sinsp::open_gvisor(std::string config_path, std::string root_path, uint32_t timeout_ms)

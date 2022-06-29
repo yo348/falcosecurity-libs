@@ -74,7 +74,7 @@ typedef struct scap_open_args
 {
 	scap_mode_t mode;
 	int fd; // If non-zero, will be used instead of fname.
-	const char* fname; ///< The name of the file to open. NULL for live captures.
+	const char* fname; ///< The name of the file to open. Probe name or NULL for live captures.
 	proc_entry_callback proc_callback; ///< Callback to be invoked for each thread/fd that is extracted from /proc, or NULL if no callback is needed.
 	void* proc_callback_context; ///< Opaque pointer that will be included in the calls to proc_callback. Ignored if proc_callback is NULL.
 	bool import_users; ///< true if the user list should be created when opening the capture.

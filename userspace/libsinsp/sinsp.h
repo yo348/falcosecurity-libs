@@ -227,7 +227,7 @@ public:
 	  @throws a sinsp_exception containing the error string is thrown in case
 	   of failure.
 	*/
-	virtual void open(uint32_t timeout_ms = SCAP_TIMEOUT_MS);
+	virtual void open(uint32_t timeout_ms = SCAP_TIMEOUT_MS, const std::string& probe_name = "");
 
 	/*!
 	  \brief Start an event capture from a trace file.
@@ -996,7 +996,7 @@ private:
 #endif
 
 	void open_int();
-	void open_live_common(uint32_t timeout_ms, scap_mode_t mode);
+	void open_live_common(uint32_t timeout_ms, scap_mode_t mode, const std::string& probe_name);
 	void init();
 	void deinit_state();
 	void consume_initialstate_events();

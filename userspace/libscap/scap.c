@@ -117,7 +117,8 @@ scap_t* scap_open_live_int(char *error, int32_t *rc,
 			   bool import_users,
 			   const char *bpf_probe,
 			   const char **suppressed_comms,
-			   interesting_ppm_sc_set *ppm_sc_of_interest)
+			   interesting_ppm_sc_set *ppm_sc_of_interest,
+			   const char *kernel_probe_name)
 {
 	char filename[SCAP_MAX_PATH_SIZE];
 	scap_t* handle = NULL;
@@ -911,7 +912,8 @@ scap_t* scap_open(scap_open_args args, char *error, int32_t *rc)
 						args.import_users,
 						args.bpf_probe,
 						args.suppressed_comms,
-						&args.ppm_sc_of_interest);
+						&args.ppm_sc_of_interest,
+						args.fname);
 		}
 #else
 		snprintf(error,	SCAP_LASTERR_SIZE, "scap_open: live mode currently not supported on Windows.");
